@@ -1,0 +1,141 @@
+"""
+Enrollment represents the class mapping.
+"""
+type Enrollment {
+  """
+  The subject code.
+  """
+  subject_code: String!
+  """
+  The student's nim.
+  """
+  nim: String!
+  """
+  The class code.
+  """
+  class_code: String!
+}
+
+type Query {
+  """
+  Get all users.
+  """
+  getAllUser: [User!]!
+  """
+  Get a user by NIM.
+  """
+  getUserByNIM(nim: String!): User!
+  """
+  Get a user by initial.
+  """
+  getUserByInitial(initial: String!): User!
+  """
+  Get a user by initial.
+  """
+  getRoleByInitial(initial: String!): String!
+  """
+  Get a user's role by NIM.
+  """
+  getRoleByNIM(nim: String!): String!
+  """
+  Get all users with a specific role.
+  """
+  getUserWithRole(role: String!): [User!]!
+  """
+  Get a user's password by nim.
+  """
+  getPasswordByNIM(nim: String!): String!
+  """
+  Get a user's password by intial.
+  """
+  getPasswordByInitial(initial: String!): String!
+  """
+  Get all enrollment.
+  """
+  getAllEnrollment: [Enrollment]
+  """
+  Get all class code by subject code.
+  """
+  getEnrollmentClassCodeBySubjectCode(subject_code: String!): [String!]
+  """
+  Get all student by class code and subject code.
+  """
+  getStudentsByClassAndSubjectCode(class_code: String!, subject_code: String!): [String!]
+  """
+  Get all enrollment by a spesific NIM.
+  """
+  getEnrollmentByNIM(nim: String!): [Enrollment!]
+  """
+  Get all rooms.
+  """
+  getAllRoom: [Room!]!
+  """
+  Get a room by room number.
+  """
+  getRoomByNumber(room_number: String!): Room!
+  """
+  Get rooms by room location/campus.
+  """
+  getRoomByCampus(campus: String!): [Room!]!
+  """
+  Get rooms by room capacity.
+  """
+  getRoomByCapacity(room_capacity: Int!): [Room!]!
+  """
+  Get all subjects.
+  """
+  getAllSubject: [Subject!]!
+  """
+  Get a subject by subject code.
+  """
+  getSubjectByCode(subject_code: String!): Subject!
+  """
+  Get subjects by subject name.
+  """
+  getSubjectByName(subject_name: String!): [Subject!]!
+}
+
+"""
+Room represents a room in SLC.
+"""
+type Room {
+  """
+  The room number.
+  """
+  room_number: String!
+  """
+  The room capacity.
+  """
+  room_capacity: Int!
+  """
+  The room location/campus.
+  """
+  campus: String!
+}
+
+"""
+Subject represents the subject in SLC.
+"""
+type Subject {
+  """
+  The subject code.
+  """
+  subject_code: String!
+  """
+  The subject name.
+  """
+  subject_name: String!
+}
+
+"""
+User is a person who can login to the system
+"""
+type User {
+  bn_number: ID!
+  name: String!
+  major: String!
+  initial: String
+  nim: String!
+  role: String!
+}
+
