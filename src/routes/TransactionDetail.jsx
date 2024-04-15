@@ -17,7 +17,7 @@ const TransactionDetail = () => {
     const [transactionNote, setTransactionNote] = useState('');
     const [seatnumber,setSeatNumber] =useState('');
     const [name,setName]=  useState('');
-    const [transacnote,setTransacnote]= useState('');
+    const [transacnote,setTransacnote]= useState('None');
     const navigate = useNavigate();
     useEffect(() => {
         invoke("get_current_user").then((test) => {
@@ -53,10 +53,9 @@ const TransactionDetail = () => {
     };
     useEffect(() => {
         gettingdata();
+        
     }, []);
-    useEffect(()=>{
-        gettransacnote();
-    })
+    
     const handleGoBack = () => {
         navigate('/home');
     };
@@ -64,13 +63,23 @@ const TransactionDetail = () => {
     const toggleShowStudentMapping = () => {
         setShowStudentMapping(!showStudentMapping);
     };
-    const gettransacnote =  async () => {
-        const go = await invoke("gettransacnote",{transacid: parseInt(transactionId)});
-        setTransacnote(go);
+    useEffect(() => {
+        gettransacnote();
+    }, [transacnote]);
+    
+    const gettransacnote = async () => {
+        const go = await invoke("gettransacnote", { transacid: parseInt(transactionId) });
+        if (go !== null) {
+            setTransacnote(go);
+        } else {
+            // Handle the case when the value is null
+            setTransacnote(""); // Or set it to some default value
+        }
     }
     const appendTransactionNote = async (note) => {
         const append =await invoke("appendnote",{transacid: parseInt(transactionId), note:note});
         if(append) {
+            gettransacnote();
             console.log("7yes");
         }
         else{
@@ -97,6 +106,13 @@ const TransactionDetail = () => {
     };
 
     const downloadQuestion = async () => {
+        const questioncheck = await invoke("question_check", { transacid: parseInt(transactionId) });
+        if(!questioncheck)
+        {
+            alert("no question to be downloaaded");
+            return;
+        }
+    
         if (user && user.role === 'Assistant') {
             const transactionDateTime = new Date(`${transacdata.date} ${transacdata.time}`);
             const transactionEndDateTime = new Date(transactionDateTime.getTime() + 100 * 60000);
@@ -122,7 +138,6 @@ const TransactionDetail = () => {
             document.body.removeChild(downloadLink);
         }
     };
-
     const uploadquestion = async () => {
         try {
             const fileInput = document.getElementById('fileInput'); 

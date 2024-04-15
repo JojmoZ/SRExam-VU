@@ -286,6 +286,34 @@ pub fn getusers(mysql_pool: State<Pool>) -> Result<Vec<User>, ()> {
     Ok(users)
 }
 
+
+#[tauri::command]
+pub fn getstudents(mysql_pool: State<Pool>) -> Result<Vec<User>, ()> {
+    let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
+
+    let query = "
+    SELECT bn_number, initial, major, name, nim, role
+    FROM user WHERE role = \"Student\"
+";
+    let result: Result<Vec<Row>, mysql::Error> = conn.query(query);
+
+    let users = match result {
+        Ok(rows) => rows
+            .into_iter()
+            .map(|row| User {
+                bn_number: Id::new(row.get::<String, &str>("bn_number").unwrap()),
+                initial: row.get("initial").unwrap(),
+                major: row.get("major").unwrap(),
+                name: row.get("name").unwrap(),
+                nim: row.get("nim").unwrap(),
+                role: row.get("role").unwrap(),
+            })
+            .collect(),
+        Err(_) => return Err(()), 
+    };
+
+    Ok(users)
+}
 pub async fn authenticate_user_initial(
     mysql_pool: State<'_, Pool>,
     initial: String,

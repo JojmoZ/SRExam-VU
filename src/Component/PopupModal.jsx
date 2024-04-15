@@ -10,7 +10,7 @@ const PopupModal = ({ nimValidityList, handleCancel,subjects,classes,date,time,r
     useEffect(() => {
         setValidTime(nimValidityList.time)
     });
-    const handleSubmit = async () => {
+    const submittransac = async () => {
         const validNimValidityList = nimValidityList.filter((item) => item.valid);
 
         if (validNimValidityList.length === 0) {
@@ -75,7 +75,7 @@ const PopupModal = ({ nimValidityList, handleCancel,subjects,classes,date,time,r
           <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
             <span className="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
               <button
-                onClick={handleSubmit}
+                onClick={submittransac}
                 type="button"
                 className="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-green-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-green-500 focus:outline-none focus:border-green-700 focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5"
               >

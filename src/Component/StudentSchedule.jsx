@@ -20,7 +20,7 @@ const StudentSchedule = () => {
 
   const fetchStudents = async () => {
     try {
-      const students = await invoke("getusers");
+      const students = await invoke("getstudents");
       const allSchedules = [];
       for (const student of students) {
         const schedules = await invoke("getStudentSchedule", { nim: student.nim });

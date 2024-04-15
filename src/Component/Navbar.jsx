@@ -26,9 +26,9 @@ const Navbar = () => {
         if (!user) {
             setGreet("You are not logged in");
         } else if (user.role === "Student") {
-            setGreet(<RouterLink to={"/Profilepage"}>{user.name}</RouterLink>);
+            setGreet(<RouterLink to={"/Profilepage"}>{user.nim}-{user.name}</RouterLink>);
         } else {
-            setGreet(<RouterLink to={"/Profilepage"}>{user.initial}</RouterLink>);
+            setGreet(<RouterLink to={"/Profilepage"}>{user.initial} | {user.name}</RouterLink>);
         }
     }, [user]);
 

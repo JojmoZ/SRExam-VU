@@ -50,7 +50,7 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
             [name]: value
         }));
     };
-    const handleSubmit = () => {
+    const handleRole = () => {
         const newRole = document.getElementById("newrole").value;
         const validRoles = ["Student", "Assistant", "Subject Development", "Exam Coordinator"];
         if (validRoles.includes(newRole)) {
@@ -100,8 +100,9 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
         }
     }
     const addchangeseat = async () => {
+    try {
         const transactionDateTime = new Date(`${transacdata.date} ${transacdata.time}`);
-        const transactionEndDateTime = new Date(transactionDateTime.getTime() + 100 * 60000); 
+        const transactionEndDateTime = new Date(transactionDateTime.getTime() + 100 * 60000);
         const currentDateTime = new Date();
         if (currentDateTime < transactionDateTime || currentDateTime > transactionEndDateTime) {
             alert("You can only extend time while the transaction is ongoing.");
@@ -109,12 +110,16 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
         }
         const newSeat = document.getElementById("newseat").value;
         const reasoning = document.getElementById("reasoning").value;
+        if (!newSeat || !reasoning) {
+            alert("Please fill in all fields.");
+            return;
+        }
         const seatExists = await invoke("validateseat", { newseat: parseInt(newSeat), transacid: transacid });
         if (!seatExists) {
             alert("The new seat number already exists. Please choose a different seat.");
             return;
         }
-        console.log(typeof student);
+
         const go = await invoke("changeseating", { newseat: parseInt(newSeat), reasoning: reasoning, nim: student, transacid: transacid });
         if (go) {
             const concat = await invoke("concatnotes",{ newseat: parseInt(newSeat), reasoning: reasoning, nim: student, transacid: transacid , oldseat:oldseater ,name:myname});
@@ -122,7 +127,11 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
         } else {
             alert("Change Seat Not available");
         }
-    };
+    } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred while processing your request.");
+    }
+};
     const downloadAnwer = async () => {
         const checker = await invoke("checkupload",{ transacid: parseInt(transacid), nim: student });
         if(!checker){
@@ -140,17 +149,15 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
 
     const addreport = async () => {
         try {
+            if (!newReport.description || !document.querySelector('input[name="picture"]').files[0]) {
+                alert("Please fill in all fields.");
+                return;
+            }
             const transactionDateTime = new Date(`${transacdata.date} ${transacdata.time}`);
             const transactionEndDateTime = new Date(transactionDateTime.getTime() + 100 * 60000);
             const currentDateTime = new Date();
             if (currentDateTime < transactionDateTime || currentDateTime > transactionEndDateTime) {
                 alert("You can only extend time while the transaction is ongoing.");
-                return;
-            }
-            const fileInput = document.querySelector('input[name="picture"]');
-            const file = fileInput.files[0];
-            if (!file) {
-                console.error("No file selected");
                 return;
             }
             const reader = new FileReader();
@@ -281,7 +288,7 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
                         <div>
                             <label htmlFor="newrole">Input New Role</label> <br />
                             <input type="text" id="newrole" /> <br /> <br />
-                            <button onClick={handleSubmit}>Submit</button>
+                            <button onClick={handleRole}>Submit</button>
                         </div>
                     }
                     {purpose ==="Look" && <div>

@@ -42,20 +42,18 @@ const NoStudentHomePage = () => {
     setShowAllTransactions(!showAllTransactions);
   };
 
-  const getRowColor = (date) => {
-    const transactionDate = new Date(date);
-    const today = new Date();
+  const getRowColor = (verif) => {
     if (showAllTransactions) {
-      if (transactionDate > today) {
+      if (verif === "Done") {
         console.log("Transaction date is in the future");
-        return "bg-red-600"; 
+        return "bg-green-600"; 
+
       } else {
         console.log("Transaction date is in the past");
-        return "bg-green-600"; 
+        return "bg-red-600"; 
       }
     } else {
-      if (transactionDate > today) {
-        console.log("Transaction date is in the future");
+      if (verif === "Done") {
         return "bg-green-600";
       } else {
         console.log("Transaction date is in the past");
@@ -84,7 +82,7 @@ const NoStudentHomePage = () => {
           </thead>
           <tbody>
             {transactlist.map((transact, index) => (
-              <tr key={index} className={getRowColor(transact.date)} >
+              <tr key={index} className={getRowColor(transact.verif)} >
                 <td className="border  border-gray-300 px-4 py-2">{transact.subject_code}</td>
                 <td className="border  border-gray-300 px-4 py-2">{transact.subject_name}</td>
                 <td className="border  border-gray-300 px-4 py-2">{transact.room}</td>

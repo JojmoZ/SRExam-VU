@@ -39,6 +39,7 @@ const Loginpage = () => {
             try {
                 const role = await invoke("get_role_by_nim", { nim: formData.username.toString() });
                 console.log(role);
+                
                 if (["Assistant", "Subject Development", "Exam Coordinator"].includes(role)) 
                 {
                     const checker = await invoke("getpassfromdbnim",{ nim: formData.username.toString() })

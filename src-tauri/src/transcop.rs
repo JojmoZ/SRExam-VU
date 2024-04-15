@@ -23,6 +23,7 @@ use crate::userop::User;
 
 #[derive(Debug, Serialize)]
 pub struct TransactionInfo {
+    pub transacid :i32,
     pub subject_code: String,
     pub subject_name: String,
     pub room: String,
@@ -30,6 +31,7 @@ pub struct TransactionInfo {
     pub time: String,
     pub seat_number: Option<u64>,
 }
+
 #[derive(Debug, Serialize)]
 pub struct AssistTrans {
     pub transacid: i32,
@@ -39,7 +41,9 @@ pub struct AssistTrans {
     pub date: String,
     pub time: String,
     pub classes: String,
+    pub verif:Option<String>
 }
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TransacList {
     pub transacid: i32,
@@ -549,13 +553,13 @@ pub fn sendassistschedule(
 pub fn assisttrans(mysql_pool: State<'_, Pool>, user: User) -> Result<Vec<AssistTrans>, String> {
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
     let query = format!(
-        "SELECT th.transacid, subject.subject_name, th.subject_code , th.room_number, th.date, th.time, th.classes FROM 
+        "SELECT th.transacid, subject.subject_name, th.subject_code , th.room_number, th.date, th.time, th.classes, th.verified FROM 
         transacheader AS th JOIN subject 
         ON subject.subject_code = th.subject_code WHERE th.proctor =  '{}'", user.nim
     );
     match conn.query_map(
         &query,
-        |(transacid, subject_name, subject_code, room, date, time, classes)| AssistTrans {
+        |(transacid, subject_name, subject_code, room, date, time, classes,verif)| AssistTrans {
             transacid,
             subject_name,
             subject_code,
@@ -563,6 +567,7 @@ pub fn assisttrans(mysql_pool: State<'_, Pool>, user: User) -> Result<Vec<Assist
             date,
             time,
             classes,
+            verif, 
         },
     ) {
         Ok(transactions) => Ok(transactions),
@@ -577,13 +582,13 @@ pub fn assisttrans(mysql_pool: State<'_, Pool>, user: User) -> Result<Vec<Assist
 pub fn futureassist(mysql_pool: State<'_, Pool>, user: User) -> Result<Vec<AssistTrans>, String> {
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
     let query = format!(
-        "SELECT th.transacid, subject.subject_name, th.subject_code, th.classes, th.room_number, th.date, th.time FROM 
+        "SELECT th.transacid, subject.subject_name, th.subject_code, th.classes, th.room_number, th.date, th.time, th.verified FROM 
         transacheader AS th JOIN subject 
         ON subject.subject_code = th.subject_code WHERE th.proctor =  '{}' and th.date > CURRENT_DATE", user.nim
     );
     match conn.query_map(
         &query,
-        |(transacid, subject_name, subject_code, room, date, time, classes)| AssistTrans {
+        |(transacid, subject_name, subject_code, room, date, time, classes,verif)| AssistTrans {
             transacid,
             subject_name,
             subject_code,
@@ -591,6 +596,7 @@ pub fn futureassist(mysql_pool: State<'_, Pool>, user: User) -> Result<Vec<Assis
             date,
             time,
             classes,
+            verif,
         },
     ) {
         Ok(transactions) => Ok(transactions),
@@ -609,7 +615,7 @@ pub async fn get_transac_info(
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
 
     let query = format!(
-        "SELECT th.subject_code, s.subject_name, th.room_number, th.date, th.time, td.seatnumber
+        "SELECT th.transacid, th.subject_code, s.subject_name, th.room_number, th.date, th.time, td.seatnumber
          FROM transacdetail AS td
          INNER JOIN transacheader AS th ON td.transacid = th.transacid  INNER JOIN subject AS s ON s.subject_code = th.subject_code 
          WHERE td.nim = '{}'",
@@ -618,7 +624,8 @@ pub async fn get_transac_info(
 
     match conn.query_map(
         query,
-        |(subject_code, subject_name, room, date, time, seat_number): (
+        |(transacid, subject_code, subject_name, room, date, time, seat_number): (
+            i32,
             String,
             String,
             String,
@@ -627,6 +634,7 @@ pub async fn get_transac_info(
             Option<u64>,
         )| {
             TransactionInfo {
+                transacid,
                 subject_code,
                 subject_name,
                 room,
@@ -911,22 +919,6 @@ pub fn filterTransactions(criteria: FilterCriteria, mysql_pool: State<'_, Pool>)
     }
 }
 
-#[tauri::command]
-pub fn uploadquestion(fileContentBase64: String, transcid:i32,mysql_pool: State<Pool>) -> bool {
-    let file_data = base64::decode(fileContentBase64).expect("Failed to decode base64 file data");
-
-    let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
-    let result = conn.exec_drop(
-        "UPDATE transacheader
-        SET question = :file_content
-        WHERE transacid = :transid",
-        params! {
-            "file_content" => file_data,
-            "transid" => transcid,
-        },
-    );
-    result.is_ok()
-}
 
 #[tauri::command]
 pub fn download_question(transcid: i32, mysql_pool: State<Pool>) -> Option<String> {
@@ -977,6 +969,22 @@ pub fn timeextendperson(minutes: i32, reason:String,transacid:i32, nim: String, 
         },
     );
     
+    result.is_ok()
+}
+
+#[tauri::command]
+pub fn uploadquestion(fileContentBase64: String, transcid:i32,mysql_pool: State<Pool>) -> bool {
+    let file_data = base64::decode(fileContentBase64).expect("Failed to decode base64 file data");
+    let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
+    let result = conn.exec_drop(
+        "UPDATE transacheader
+        SET question = :file_content
+        WHERE transacid = :transid",
+        params! {
+            "file_content" => file_data,
+            "transid" => transcid,
+        },
+    );
     result.is_ok()
 }
 
@@ -1103,6 +1111,22 @@ pub fn addverificator(transacid:i32, transacnote:String, mysql_pool: State<Pool>
 }
 
 #[tauri::command]
+pub fn finalize(transacid:i32,nim:String,mysql_pool: State<Pool>)->bool{
+    let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
+    let result = conn.exec_drop(
+        "UPDATE transacdetail
+        SET final = :final
+        WHERE transacid = :transid AND nim = :nim",
+        params! {
+            "final" => "yes",
+            "transid" => transacid,
+            "nim" => nim,
+        },
+    );
+    result.is_ok()
+}
+
+#[tauri::command]
 pub fn changeseating(newseat: i32, reasoning: String, nim: String, transacid: i32, mysql_pool: State<Pool>) -> bool {
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
     let result = conn.exec_drop(
@@ -1219,7 +1243,7 @@ pub fn concatnotes(newseat:i32,reasoning:String,nim:String,transacid:i32,oldseat
 }
 
 #[tauri::command]
-pub fn gettransacnote(mysql_pool: State<Pool>,transacid:i32)-> String {
+pub fn gettransacnote(mysql_pool: State<Pool>, transacid: i32) -> Option<String> {
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
     let query = r#"
         SELECT notes FROM transacheader WHERE transacid = :transacid;
@@ -1227,12 +1251,21 @@ pub fn gettransacnote(mysql_pool: State<Pool>,transacid:i32)-> String {
     let params = params! {
         "transacid" => transacid,
     };
+
     let result = conn
         .exec_first(query, params)
-        .expect("Failed to execute query");
+        .expect("Failed to execute query")
+        .map(|row: mysql::Row| {
+            let notes: Option<String> = match row.get(0) {
+                Some(note) => Some(note), 
+                None => None,            
+            };
+            notes
+        });
+
     match result {
-        Some((role,)) => role,
-        None => "Role not found".to_string(), 
+        Some(option) => option,
+        None => None,
     }
 }
 
@@ -1257,5 +1290,26 @@ pub fn appendnote(transacid: i32, note: String, mysql_pool: State<Pool>) -> bool
     match result {
         Ok(_) => true,  
         Err(_) => false,  
+    }
+}
+
+#[tauri::command]
+pub fn question_check(mysql_pool: State<Pool>, transacid: i32) -> bool {
+    let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
+    let query = r#"
+        SELECT question FROM transacheader WHERE transacid = :transacid;
+    "#;
+    let params = params! {
+        "transacid" => transacid,
+    };
+
+    let result = conn
+        .exec_first(query, params)
+        .expect("Failed to execute query")
+        .map(|row: mysql::Row| row.get::<Vec<u8>, _>(0));
+
+    match result {
+        Some(question) => question.expect("REASON").len() != 0, 
+        None => false, 
     }
 }

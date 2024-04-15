@@ -118,7 +118,10 @@ fn main() {
             transcop::checkupload,
             transcop::concatnotes,
             transcop::gettransacnote,
-            transcop::appendnote
+            transcop::appendnote,
+            userop::getstudents,
+            transcop::finalize,
+            transcop::question_check
 
         ])
         .run(tauri::generate_context!())

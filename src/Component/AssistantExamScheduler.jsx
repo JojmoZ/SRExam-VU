@@ -89,6 +89,7 @@ const AssistantScheduler = () => {
             console.log(assignedAssistants.time);
           setShowPopup(true);
         } catch (error) {
+            setShowPopup(false);
           console.error(error);
         }
       };
