@@ -42,7 +42,7 @@ pub async fn get_all_enrollment<'a>(mysql_pool: State<'a, Pool>) -> Result<bool,
                 .into_iter()
                 .filter_map(|enrollment_option| enrollment_option)
                 .collect();
-            seed_users_to_database(&mysql_pool, enrollments).await;
+            seed_enrollments_to_database(&mysql_pool, enrollments).await;
         }
         return Ok(true);
     }
@@ -96,7 +96,7 @@ pub fn gettablecount(tablename: &str, mysql_pool: State<Pool>) -> i32 {
     }
 }
 
-pub async fn seed_users_to_database(mysql_pool: &State<'_, Pool>, enrollments: Vec<Enrollment>) {
+pub async fn seed_enrollments_to_database(mysql_pool: &State<'_, Pool>, enrollments: Vec<Enrollment>) {
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
     for enrollment in enrollments {
         let query = r#"

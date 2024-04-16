@@ -33,7 +33,7 @@ pub async fn get_all_subject<'a>(mysql_pool: State<'a, Pool>) -> Result<bool, ()
 let count = gettablecount("subject", mysql_pool.clone());
 println!("{}", count);
 if count == 0 {
-    seed_users_to_database(&mysql_pool, response.data.unwrap().get_all_subject).await;
+    seed_subjects_to_database(&mysql_pool, response.data.unwrap().get_all_subject).await;
     return Ok(true);
 }
 Ok(false) 
@@ -61,7 +61,7 @@ pub fn gettablecount(tablename: &str, mysql_pool: State<Pool>) -> i32 {
     }
 }
 
-pub async fn seed_users_to_database(mysql_pool: &State<'_, Pool>, subjects: Vec<Subject>) {
+pub async fn seed_subjects_to_database(mysql_pool: &State<'_, Pool>, subjects: Vec<Subject>) {
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
     for subject in subjects {
         let query = r#"

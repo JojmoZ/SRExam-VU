@@ -37,7 +37,7 @@ pub async fn get_all_rooms<'a>(mysql_pool: State<'a, Pool>) -> Result<bool, ()> 
 let count = gettablecount("room", mysql_pool.clone());
 println!("{}", count);
 if count == 0 {
-    seed_users_to_database(&mysql_pool, response.data.unwrap().get_all_room).await;
+    seed_rooms_to_database(&mysql_pool, response.data.unwrap().get_all_room).await;
     return Ok(true); 
 }
 Ok(false) 
@@ -65,7 +65,7 @@ pub fn gettablecount(tablename: &str, mysql_pool: State<Pool>) -> i32 {
     }
 }
 
-pub async fn seed_users_to_database(mysql_pool: &State<'_, Pool>, rooms: Vec<Room>) {
+pub async fn seed_rooms_to_database(mysql_pool: &State<'_, Pool>, rooms: Vec<Room>) {
     let mut conn = mysql_pool.get_conn().expect("Failed to get connection");
     for room in rooms {
         let query = r#"
