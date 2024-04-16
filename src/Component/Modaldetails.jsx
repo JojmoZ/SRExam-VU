@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api';
 import React, { useEffect, useState } from 'react';
 
-const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subject,date ,oldseater,myname}) => {
+const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subject,date ,oldseater,myname,finalfunction}) => {
     const [timeExtension, setTimeExtension] = useState('');
     const [extensionReason, setExtensionReason] = useState('');
     const [newReport, setNewReport] = useState({description: "",});
@@ -221,12 +221,14 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
                                 {purpose === "role" && "Edit Role"}
                                 {purpose === "Look" && "Evidence"}
                                 {purpose === "Info" && "Transac Info"}
+                                {purpose === "finalize" && "finalize your work"}
                             </h3>
+                            {purpose ==="finalize"  && <p>Are you sure?</p>}
                             {purpose ==="Look" && <p>Photos:</p>}
-                            {purpose === "role" && <p></p>}
-                            {purpose !== "role" && purpose !=="Look" && <p>Transaction ID: {transacid}</p>}
+                            {purpose === "role" && purpose ==="finalize" && <p></p>}
+                            {purpose !== "role" && purpose !=="Look" && purpose!=="finalize" && <p>Transaction ID: {transacid}</p>}
                             {purpose === "Verify" && <p>Proctor: {student}</p>}
-                            {purpose !== "Verify" && purpose !== "role" && purpose !=="Look" && <p>Student : {student}</p>}
+                            {purpose !== "Verify" && purpose !== "role" && purpose !=="Look" && purpose !=="finalize" && <p>Student : {student}</p>}
                         </div>
                     </div>
                     {purpose === "Add" && <div className=" items-center">
@@ -299,6 +301,9 @@ const Modaldetails = ({ transacid, onClose, purpose, student, transacnote,subjec
                             <p>{subject}</p> <br />
                             <p>{date}</p>
                             </div>}
+                    {purpose ==="finalize" && <div>
+                        <button className='mt-6' onClick={()=>finalfunction(transacid)}>FINALIZE!</button>
+                        </div>}
                     <span className="close absolute top-0 right-0 p-2 cursor-pointer" onClick={onClose}>&times;</span>
                 </div>
             </div>

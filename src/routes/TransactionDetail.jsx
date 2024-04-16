@@ -72,8 +72,7 @@ const TransactionDetail = () => {
         if (go !== null) {
             setTransacnote(go);
         } else {
-            // Handle the case when the value is null
-            setTransacnote(""); // Or set it to some default value
+            setTransacnote(""); 
         }
     }
     const appendTransactionNote = async (note) => {

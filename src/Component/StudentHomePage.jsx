@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api';
+import Modaldetails from './modaldetails';
 
 const StudentHomePage = () => {
     const [transactions, setTransactions] = useState([]);
     const [user, setUser] = useState(null);
-    const [final, setFinal] = useState(false); // Changed initial state to false
+    const [showModal, setShowModal] = useState(false);
+    const [selectedTransacid, setSelectedTransacid] = useState(null);
+    const [modalPurpose, setModalPurpose] = useState('');
+    const [final, setFinal] = useState(false); 
     useEffect(() => {
         invoke("get_current_user").then((currentUser) => {
             setUser(currentUser);
@@ -28,13 +32,18 @@ const StudentHomePage = () => {
         }
     };
 
-    const isWithinRange = (transactionTime) => {
+    const isWithinRange = (transactionTime, transactionDate) => {
         const today = new Date();
-        const [hours, minutes] = transactionTime.split(":").map(Number);
-        const transactionDateTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
+        const [transactionHours, transactionMinutes] = transactionTime.split(":").map(Number);
+        
+        const [transactionYear, transactionMonth, transactionDay] = transactionDate.split("-").map(Number);
+        const transactionDateTime = new Date(transactionYear, transactionMonth - 1, transactionDay, transactionHours, transactionMinutes);
+        
         const differenceInMinutes = (today - transactionDateTime) / (1000 * 60);
-        return differenceInMinutes >= -100 && differenceInMinutes <= 100;
+        
+        return differenceInMinutes >= 0 && differenceInMinutes <= 100;
     };
+
     const downloadQuestion = async (transacid) => {
         const response = await invoke("download_question", { transcid: parseInt(transacid) });
         const downloadLink = document.createElement('a');
@@ -80,14 +89,23 @@ const StudentHomePage = () => {
         const go = await invoke("finalize", { transacid: parseInt(transacid), nim: user.nim })
         if (go === true) {
             setFinal(go);
+            console.log(final);
         }
     }
-
+    const openModal = (transacid, purpose) => {
+        console.log("trseses")
+        setSelectedTransacid(transacid);
+        setModalPurpose(purpose);
+        setShowModal(true);
+    }
+    const closeModal = () => {
+        setShowModal(false);
+    };
     return (
         <div className="container mx-auto text-center">
             <h2 className="text-xl font-semibold mb-4">Transaction Information</h2>
             <div className="overflow-x-auto inline-block">
-                {transactions.some(transaction => isWithinRange(transaction.time)) ? (
+                {transactions.some(transaction => isWithinRange(transaction.time,transaction.date)) ? (
                    <div>
                    {transactions.map((transaction, index) => (
                        <div key={index}>
@@ -116,8 +134,9 @@ const StudentHomePage = () => {
                            </div>
                            <div className='flex  justify-evenly items-center mb-9'>
                                <p>Finalize Your Work </p>
-                               <button  className="bg-blue-500 hover:bg-blue-700" onClick={()=>finalize(transaction.transacid)} disabled={final === true}>Finalize</button>
+                               <button  className="bg-blue-500 hover:bg-blue-700" onClick={() => openModal(parseInt(transaction.transacid), 'finalize')} disabled={final === true}>Finalize</button>
                            </div>
+                           {showModal && <Modaldetails transacid={selectedTransacid} purpose={modalPurpose} onClose={closeModal} finalfunction={finalize}/>}
                        </div>
                    ))}
                </div>
