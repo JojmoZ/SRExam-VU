@@ -58,7 +58,7 @@ const Loginpage = () => {
                             console.log("hahahaha");
                             navigate("/home");
                         } else {
-                            setLoginError("Wrong password or username A");
+                            setLoginError("Wrong password or username");
                         }
                     }
                     else
@@ -68,7 +68,7 @@ const Loginpage = () => {
                             const go = await invoke("loginstudent", { nim: formData.username.toString() });
                             navigate("/home");
                         } else {
-                            setLoginError("Wrong password or username B");
+                            setLoginError("Wrong password or username");
                         }
                        
                     }
@@ -87,7 +87,7 @@ const Loginpage = () => {
                             const go = await invoke("loginstudent", { nim: formData.username.toString() });
                             navigate("/home");
                         } else {
-                            setLoginError("Wrong password or username A");
+                            setLoginError("Wrong password or username");
                         }
                     }
                     else
@@ -97,7 +97,7 @@ const Loginpage = () => {
                             const go = await invoke("loginstudent", { nim: formData.username.toString() });
                             navigate("/home");
                         } else {
-                            setLoginError("Wrong password or username B");
+                            setLoginError("Wrong password or username");
                         }
                     }
                 }
@@ -121,7 +121,7 @@ const Loginpage = () => {
                     const godb = await invoke("insert_pass_db",{password:password, nim:nimassis });
                     navigate("/home");
                 } else {
-                    setLoginError("Wrong password or username C");
+                    setLoginError("Wrong password or username");
                 }
                 }
                 else
@@ -131,7 +131,7 @@ const Loginpage = () => {
                         const go = await invoke("loginassistant", { initial: initial });
                         navigate("/home");
                     } else {
-                        setLoginError("Wrong password or username C");
+                        setLoginError("Wrong password or username");
                     }
                 }
                
